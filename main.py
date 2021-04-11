@@ -23,10 +23,10 @@ class Main:
         self.brushes = str(brushes)         # Select Brushes
         self.imageHeight, self.imageWidth, _ = self.image.shape
         self.population = []
-        self.generate()
+        self.generate()                     # Begin evolution
 
     # Returns Different Size and Number of Strokes Depending on the Epoch
-    def getStrokes(self, epoch, strokes, relativeStrokeSizes):
+    def getStrokes(self, epoch, strokes):
         allStrokes = []
         numberOfStrokes = 30 + 2 * epoch
 
@@ -42,6 +42,7 @@ class Main:
         # random.shuffle(allStrokes)
         return allStrokes
 
+    # Paints strokes on the canvas
     def paintCanvas(self, canvas, strokeHeight, strokeWidth, epoch):
         for stroke in self.allStrokes:
             y = random.randint(0, self.imageHeight-strokeHeight)
@@ -50,6 +51,7 @@ class Main:
 
         return cv.blur(canvas, (self.epochs-epoch, self.epochs-epoch))
 
+    # Calculates fitness in comparison to the comparisonImage
     def calculateFitness(self, canvas, comparisonImage):
         diff1 = cv.subtract(canvas, comparisonImage)
         diff2 = cv.subtract(comparisonImage, canvas)
@@ -57,6 +59,7 @@ class Main:
         totalDiff = np.sum(totalDiff)
         return(totalDiff)
 
+    # Selects the fittest of the bunch
     def selectFit(self, varianceValues):
         length = len(varianceValues)
         fit = []
@@ -67,8 +70,7 @@ class Main:
             unfit.append(varianceValues[i][1])
         return(fit, unfit)
 
-    def generateChildren(self, population, fit):
-        
+    #### def generateChildren(self, population, fit): unblock
 
     # This is The Main Function
     def generate(self):
@@ -78,7 +80,7 @@ class Main:
         for stroke in strokes:
             self.strokes.append(
                 cv.imread("strokes/set" + self.brushes + '/' + stroke))
-        relativeStrokeSizes = []
+        # relativeStrokeSizes = []
         # for stroke in self.strokes:
         #     y = self.image.shape[0] / stroke.shape[0]
         #     x = self.image.shape[1] / stroke.shape[1]
@@ -86,7 +88,7 @@ class Main:
 
         for epoch in range(1, self.epochs):
             self.allStrokes = self.getStrokes(
-                epoch, self.strokes, relativeStrokeSizes)  # Clears Out the strokes and gives new ones every epoch
+                epoch, self.strokes)  # Clears Out the strokes and gives new ones every epoch
             strokeHeight, strokeWidth, _ = self.allStrokes[0].shape
 
             if not len(self.population):
@@ -94,7 +96,7 @@ class Main:
 
             for generation in range(self.generations):
                 comparisonImage = cv.blur(
-                    self.image, (self.generations-generation, self.generations-generation))
+                    self.image, (self.generations-generation, self.generations-generation))     # Gradually less blurred image for comparison
                 varianceValues = []
                 for i in range(len(self.population)):
                     canvas = self.population[i]
@@ -104,9 +106,10 @@ class Main:
                         (self.calculateFitness(canvas, comparisonImage), i))
 
                 fit, unfit = self.selectFit(sorted(varianceValues))
-                children = self.generateChildren(self.population, fit)
+                # children = self.generateChildren(self.population, fit) unblock
                 # self.population = self.killMisFits(self.population, children)
 
 
-initiate = Main("sample.png")
-print(initiate.image.shape)
+if __name__ == "__main__":
+    initiate = Main("sample.png")
+    print(initiate.image.shape)
